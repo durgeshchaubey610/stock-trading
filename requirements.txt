@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+yfinance
+ta
+apscheduler
+python-jose
+passlib
+bcrypt
+feedparser 
+transformers 
+torch 
+nltk
+textblob

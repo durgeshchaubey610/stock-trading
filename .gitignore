@@ -1,0 +1,17 @@
+# Python cache/artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local environment
+.env
+.venv/
+venv/
+
+# Logs
+*.log
+logs/
+
+# Tooling
+.pytest_cache/
+.mypy_cache/

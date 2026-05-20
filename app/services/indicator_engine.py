@@ -1,24 +1,13 @@
 import pandas as pd
+import ta
 
 def scalar(v):
     try:
-        return float(v.item())
-    except:
+        if hasattr(v, 'item'):
+            return float(v.item())
         return float(v)
-
-def compute_rsi(close):
-
-    delta = close.diff()
-
-    gain = delta.clip(lower=0)
-    loss = -delta.clip(upper=0)
-
-    rs = gain.rolling(14).mean() / loss.rolling(14).mean()
-
-    rsi = 100 - (100/(1+rs))
-
-    return rsi
-
+    except:
+        return 0.0
 
 def calculate_indicators(df):
 
@@ -27,22 +16,27 @@ def calculate_indicators(df):
     low = df["Low"]
     volume = df["Volume"]
 
-    ma20 = close.rolling(20).mean()
-    ma50 = close.rolling(50).mean()
-    ma200 = close.rolling(200).mean()
+    # Momentum
+    rsi = ta.momentum.RSIIndicator(close=close, window=14).rsi()
+    stoch = ta.momentum.StochasticOscillator(high=high, low=low, close=close, window=14, smooth_window=3).stoch()
 
-    rsi = compute_rsi(close)
+    # Trend
+    macd_obj = ta.trend.MACD(close=close)
+    macd = macd_obj.macd()
+    macd_signal = macd_obj.macd_signal()
+    
+    ma20 = ta.trend.SMAIndicator(close=close, window=20).sma_indicator()
+    ma50 = ta.trend.SMAIndicator(close=close, window=50).sma_indicator()
+    ma200 = ta.trend.SMAIndicator(close=close, window=200).sma_indicator()
+    
+    adx = ta.trend.ADXIndicator(high=high, low=low, close=close, window=14).adx()
 
-    ema12 = close.ewm(span=12).mean()
-    ema26 = close.ewm(span=26).mean()
+    # Volatility
+    bb = ta.volatility.BollingerBands(close=close, window=20, window_dev=2)
+    bb_lower = bb.bollinger_lband()
+    atr = ta.volatility.AverageTrueRange(high=high, low=low, close=close, window=14).average_true_range()
 
-    macd = ema12 - ema26
-    macd_signal = macd.ewm(span=9).mean()
-
-    std = close.rolling(20).std()
-
-    bb_lower = ma20 - 2 * std
-
+    # Volume
     avg_volume = volume.rolling(20).mean()
 
     prev_high = high.iloc[-2]
@@ -50,6 +44,9 @@ def calculate_indicators(df):
     return {
         "price": scalar(close.iloc[-1]),
         "rsi": scalar(rsi.iloc[-1]),
+        "atr": scalar(atr.iloc[-1]),
+        "adx": scalar(adx.iloc[-1]),
+        "stoch": scalar(stoch.iloc[-1]),
         "ma20": scalar(ma20.iloc[-1]),
         "ma50": scalar(ma50.iloc[-1]),
         "ma200": scalar(ma200.iloc[-1]),

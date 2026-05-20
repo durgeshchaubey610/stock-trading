@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from app.database import Base
 import datetime
-
-Base = declarative_base()
 
 class Portfolio(Base):
 

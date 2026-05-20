@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException
-from app.database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app.models.user import User
+from app.schemas.auth_schema import LoginRequest, RegisterRequest
 from app.utils.jwt_handler import create_token
 from passlib.context import CryptContext
 
@@ -25,38 +28,34 @@ def verify_password(plain_password, hashed_password):
 # -----------------------------
 
 @router.post("/register")
-def register(data: dict):
-
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
-
-    if not username or not email or not password:
-        raise HTTPException(status_code=400, detail="Missing fields")
-
-    db = SessionLocal()
+def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
     # check if user exists
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == data.email).first()
 
     if user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed_password = hash_password(password)
+    hashed_password = hash_password(data.password)
 
     new_user = User(
-        username=username,
-        email=email,
+        username=data.username,
+        email=data.email,
         password=hashed_password
     )
-    print(new_user)
 
     db.add(new_user)
     db.commit()
+    db.refresh(new_user)
 
     return {
         "status": "success",
-        "message": "User registered successfully"
+        "message": "User registered successfully",
+        "user": {
+            "id": new_user.id,
+            "username": new_user.username,
+            "email": new_user.email
+        }
     }
 
 
@@ -65,23 +64,15 @@ def register(data: dict):
 # -----------------------------
 
 @router.post("/login")
-def login(data: dict):
+def login(data: LoginRequest, db: Session = Depends(get_db)):
 
-    email = data.get("email")
-    password = data.get("password")
-    
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="Missing credentials")
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == data.email).first()
 
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid email")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if not verify_password(password, user.password):
-        raise HTTPException(status_code=401, detail="Invalid password")
+    if not verify_password(data.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_token({
         "user_id": user.id,

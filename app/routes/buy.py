@@ -60,7 +60,6 @@ def run_weekly_strategy(
                         "stock_symbol": symbol,
                         "buy_price": price,
                         "quantity": 1,
-                        "buy_number": 1,
                         "action": 1  # BUY
                     }
 
@@ -86,7 +85,6 @@ def run_weekly_strategy(
                             "stock_symbol": symbol,
                             "buy_price": price,
                             "quantity": qty,
-                            "buy_number": 2,
                             "action": 1
                         }
 

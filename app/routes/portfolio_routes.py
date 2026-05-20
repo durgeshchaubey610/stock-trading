@@ -31,8 +31,9 @@ def add_portfolio(
     return add_portfolio_service(user["user_id"], data, db)
 
 
-@router.delete("/remove/{buy_number}")
+@router.delete("/remove/{stock_symbol}/{buy_number}")
 def remove_stock(
+    stock_symbol: str,
     buy_number: int,
     remove_quantity: int,
     user=Depends(get_current_user),
@@ -40,6 +41,7 @@ def remove_stock(
 ):
     return remove_stock_service(
         user["user_id"],
+        stock_symbol,
         buy_number,
         remove_quantity,
         db

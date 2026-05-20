@@ -7,9 +7,11 @@ ta
 apscheduler
 python-jose
 passlib
-bcrypt
+bcrypt==4.0.1
 feedparser 
 transformers 
 torch 
 nltk
 textblob
+xgboost
+email-validator

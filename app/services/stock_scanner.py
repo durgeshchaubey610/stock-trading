@@ -1,6 +1,23 @@
 import yfinance as yf
 from app.data.nifty500 import nifty500
 
+
+def _to_float(value):
+    if hasattr(value, "iloc"):
+        value = value.iloc[-1]
+
+    if hasattr(value, "item"):
+        try:
+            value = value.item()
+        except ValueError:
+            pass
+
+    if hasattr(value, "iloc"):
+        value = value.iloc[-1]
+
+    return float(value)
+
+
 def scan_stocks():
 
     stocks = []
@@ -10,6 +27,9 @@ def scan_stocks():
         ticker = yf.Ticker(symbol)
         data = ticker.history(period="1y")
 
+        if data.empty:
+            continue
+
         price = data["Close"].tail(1)
 
         low52 = data["Low"].min()
@@ -17,9 +37,9 @@ def scan_stocks():
 
         stocks.append({
             "symbol": symbol,
-            "price": float(price.iloc[0]),
-            "week52_low": float(low52),
-            "week52_high": float(high52),
+            "price": _to_float(price),
+            "week52_low": _to_float(low52),
+            "week52_high": _to_float(high52),
             "history": data.reset_index().to_dict(orient="records")
         })
 

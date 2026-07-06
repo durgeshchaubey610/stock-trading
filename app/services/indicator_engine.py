@@ -11,10 +11,10 @@ def scalar(v):
 
 def calculate_indicators(df):
 
-    close = df["Close"]
-    high = df["High"]
-    low = df["Low"]
-    volume = df["Volume"]
+    close = df["Close"].squeeze()
+    high = df["High"].squeeze()
+    low = df["Low"].squeeze()
+    volume = df["Volume"].squeeze()
 
     # Momentum
     rsi = ta.momentum.RSIIndicator(close=close, window=14).rsi()

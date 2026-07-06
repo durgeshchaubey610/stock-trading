@@ -15,3 +15,7 @@ nltk
 textblob
 xgboost
 email-validator
+google-generativeai
+psutil
+python-multipart
+razorpay

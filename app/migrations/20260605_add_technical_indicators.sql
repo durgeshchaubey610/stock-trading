@@ -1,0 +1,15 @@
+-- Add technical indicators and stock metrics to stocks table
+ALTER TABLE stocks ADD COLUMN sma20 FLOAT;
+ALTER TABLE stocks ADD COLUMN sma50 FLOAT;
+ALTER TABLE stocks ADD COLUMN sma200 FLOAT;
+ALTER TABLE stocks ADD COLUMN ema20 FLOAT;
+ALTER TABLE stocks ADD COLUMN ema50 FLOAT;
+ALTER TABLE stocks ADD COLUMN atr14 FLOAT;
+ALTER TABLE stocks ADD COLUMN macd FLOAT;
+ALTER TABLE stocks ADD COLUMN macd_signal FLOAT;
+ALTER TABLE stocks ADD COLUMN adx FLOAT;
+ALTER TABLE stocks ADD COLUMN supertrend FLOAT;
+ALTER TABLE stocks ADD COLUMN high_52_week FLOAT;
+ALTER TABLE stocks ADD COLUMN low_52_week FLOAT;
+ALTER TABLE stocks ADD COLUMN delivery_percentage FLOAT;
+ALTER TABLE stocks ADD COLUMN oi_change FLOAT;

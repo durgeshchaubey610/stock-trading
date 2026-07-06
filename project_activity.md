@@ -1,153 +1,103 @@
 # Project Activity Diagrams
 
-This document outlines the core operational workflows of the AI Trading System using Mermaid activity diagrams.
+This document outlines the core operational workflows of the AI-Powered Financial Independence (FIRE) Platform using standard Mermaid diagrams.
 
-## 1. User Registration & Authentication
+---
 
-This diagram shows the flow of a user registering a new account and subsequently logging in.
+## 1. User Registration & Login Workflow
+
+This diagram illustrates the sequence of actions when a user registers a new account and subsequently logs in.
 
 ```mermaid
-activityDiagram
-    participant User
-    participant AuthAPI
-    participant Database
+sequenceDiagram
+    actor User
+    participant AuthAPI as Auth & Billing API
+    participant DB as MySQL Database
 
-    User -> AuthAPI: Register (username, email, password)
-    AuthAPI -> Database: Check if Email Exists
-    alt Email Exists
-        Database -> AuthAPI: Found
-        AuthAPI -> User: Error (Email already registered)
-    else Email Not Found
-        Database -> AuthAPI: Not Found
-        AuthAPI -> AuthAPI: Hash Password (bcrypt)
-        AuthAPI -> Database: Save New User
-        Database -> AuthAPI: Success
-        AuthAPI -> User: Success (User Registered)
+    %% Registration
+    User->>AuthAPI: Register (username, email, password, DOB)
+    AuthAPI->>DB: Check if Email exists
+    alt Email exists
+        DB-->>AuthAPI: User exists
+        AuthAPI-->>User: Error: Email already registered
+    else Email is unique
+        DB-->>AuthAPI: Available
+        AuthAPI->>AuthAPI: Hash Password (bcrypt)
+        AuthAPI->>DB: Insert User with 1-Month Premium trial
+        DB-->>AuthAPI: Success
+        AuthAPI-->>User: Success: Account created
     end
 
-    User -> AuthAPI: Login (email, password)
-    AuthAPI -> Database: Get User by Email
-    alt User Not Found
-        Database -> AuthAPI: Empty
-        AuthAPI -> User: Error (Invalid Credentials)
-    else User Found
-        Database -> AuthAPI: User Data
-        AuthAPI -> AuthAPI: Verify Password
+    %% Login
+    User->>AuthAPI: Login (email, password)
+    AuthAPI->>DB: Query User by Email
+    alt User not found
+        DB-->>AuthAPI: None
+        AuthAPI-->>User: Error: Invalid Credentials
+    else User found
+        DB-->>AuthAPI: User details (Hashed password, subscription status)
+        AuthAPI->>AuthAPI: Verify password match
         alt Password Match
-            AuthAPI -> AuthAPI: Generate JWT Token
-            AuthAPI -> User: Success (Return Token & User Info)
+            AuthAPI->>AuthAPI: Generate JWT Token (with user_id, username, subscription_tier)
+            AuthAPI-->>User: Success (Return JWT token)
         else Password Mismatch
-            AuthAPI -> User: Error (Invalid Credentials)
+            AuthAPI-->>User: Error: Invalid Credentials
         end
     end
 ```
 
-## 2. Stock Scanning Workflow
+---
 
-This diagram illustrates how the `run_scanner` process identifies potential trading opportunities.
+## 2. Stock Scanner & Indicators Workflow
+
+This flow illustrates how background schedulers fetch stock data and how users query the Screener.
 
 ```mermaid
-activityDiagram
-    start
-    :Fetch Nifty 500 Tickers;
-    :Initialize ThreadPoolExecutor;
-    fork
-        :Fetch 1y Historical Data (yfinance);
-        :Calculate Technical Indicators (ta);
-        :Generate Trading Signals;
-        if (At least 3 signals true?) then (yes)
-            :Calculate Opportunity Score;
-            :Add to Results;
-        else (no)
-            :Discard Stock;
-        endif
-    end fork
-    :Sort Results by Score (Descending);
-    stop
+flowchart TD
+    Start([Background Scheduler Triggered]) --> GetStocks[Fetch Stock Symbols from DB]
+    GetStocks --> LoopStocks{For each stock symbol}
+    LoopStocks -- "Fetch Price & Financials" --> FetchYF[Query Yahoo Finance API]
+    FetchYF --> CalcIndicators[Calculate RSI, MFI, SMA, EMA, MACD, 52W Range]
+    CalcIndicators --> DBUpdate[Write stats to stocks and stock_details tables]
+    DBUpdate --> LoopStocks
+    
+    %% User Query Path
+    UserScreener([User opens Screener /]) --> FilterQuery[User applies custom filters e.g. MFI > 70]
+    FilterQuery --> DBSearch[Query database stocks table]
+    DBSearch --> RenderGrid[Render matching stocks and Daily AI Picks Ticker]
 ```
 
-## 3. Weekly Strategy Execution (Low-52 Week)
+---
 
-This flow describes the logic within `Low52Strategy.execute`, which is called for each stock identified by the scanner.
+## 3. Paper Trading Order Execution Workflow
 
-```mermaid
-activityDiagram
-    start
-    :Strategy Triggered (Manual or Scheduled);
-    :Check Current Time;
-    if (Hour < MARKET_BUY_TIME?) then (yes)
-        :Skip (Wait for Market Close);
-        stop
-    else (no)
-        :Fetch Last Purchase for Symbol;
-        if (No Previous Purchase?) then (yes)
-            :Set Quantity = BASE_BUY_QTY;
-            :Set Buy Number = 1;
-            :Execute NEW_BUY;
-        else (yes)
-            :Calculate Price Drop from Last Buy;
-            if (Drop >= 5%?) then (yes)
-                :Set Quantity = Last Quantity * 2;
-                :Set Buy Number = Last Buy Number + 1;
-                :Execute AVERAGING BUY;
-            else (no)
-                :HOLD (Price hasn't dropped enough);
-                stop
-            endif
-        endif
-        :Record Investment in Database;
-        :Commit Transaction;
-        stop
-    endif
-```
-
-## 4. Automated Strategy Scheduler
-
-This diagram shows the background process that executes user-selected strategies.
+This diagram traces the execution and balance checks for virtual transactions.
 
 ```mermaid
-activityDiagram
-    start
-    :Scheduler Triggers (Daily at 15:05);
-    :Fetch All Active User Strategies;
-    :Perform Global Stock Scan;
-    while (For each User/Strategy) is (Remaining)
-        while (For each Scanned Stock) is (Remaining)
-            :Execute Strategy Logic;
-            if (Buy/Sell Signal Triggered?) then (yes)
-                :Log Opportunity / Execute Trade;
-            else (no)
-                :Continue;
-            endif
-        endwhile (Next User)
-    endwhile (Done)
-    stop
-```
-
-## 5. Portfolio Management
-
-How users interact with their holdings.
-
-```mermaid
-activityDiagram
-    start
-    :User Request (View/Add/Remove);
-    if (Action == View) then
-        :Query Database for User Portfolio;
-        :Calculate Current Value / P&L;
-        :Return Portfolio List;
-    else if (Action == Add) then
-        :Validate Stock Symbol;
-        :Record Lot Purchase;
-        :Update Database;
-    else if (Action == Remove) then
-        :Identify Specific Lot (Buy Number);
-        :Validate Quantity;
-        if (Quantity == Total?) then (yes)
-            :Delete Entry;
-        else (no)
-            :Update Lot Quantity;
-        endif
-    endif
-    stop
+flowchart TD
+    Start([User triggers virtual Order]) --> CaptureDetails[Capture Symbol, Qty, Action, Price]
+    CaptureDetails --> FetchPortfolio[Retrieve available_cash from paper_portfolios]
+    FetchPortfolio --> CheckAction{Action Type?}
+    
+    %% Buy Order Flow
+    CheckAction -- BUY --> CheckCash{available_cash >= Qty * Price?}
+    CheckCash -- No --> FailBuy[Abort: Insufficient cash balance]
+    CheckCash -- Yes --> DeductCash[Deduct total cost from available_cash]
+    DeductCash --> CheckPosition{Existing position for Symbol?}
+    CheckPosition -- Yes --> AveragePrice[Recalculate avg_buy_price & add Quantity]
+    CheckPosition -- No --> CreatePosition[Insert new row in paper_positions]
+    AveragePrice --> LogTrade[Log Trade details in paper_trades]
+    CreatePosition --> LogTrade
+    
+    %% Sell Order Flow
+    CheckAction -- SELL --> CheckHoldings{Do we own Position Qty >= Order Qty?}
+    CheckHoldings -- No --> FailSell[Abort: Insufficient quantity in holdings]
+    CheckHoldings -- Yes --> CreditCash[Credit sale revenue to available_cash]
+    CreditCash --> SubtractQty[Reduce paper_positions quantity]
+    SubtractQty --> CheckZero{Remaining Qty == 0?}
+    CheckZero -- Yes --> DeletePosition[Remove position row from DB]
+    CheckZero -- No --> LogTrade
+    DeletePosition --> LogTrade
+    
+    LogTrade --> UpdateUI([Refresh Holdings Grid and current P&L in UI])
 ```

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { stockService } from '../services/api';
@@ -19,7 +19,9 @@ import {
   Download,
   Zap,
   Gem,
-  Award
+  Award,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import type { Stock } from '../types';
 
@@ -148,6 +150,58 @@ const Screener = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('market_cap');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullScreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      if (tableContainerRef.current?.requestFullscreen) {
+        tableContainerRef.current.requestFullscreen().catch(() => {});
+      }
+    } else {
+      setIsFullscreen(false);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreen]);
 
   // Default columns as requested
   const DEFAULT_COLUMNS = ['symbol', 'close_price', 'signal', 'market_cap', 'mfi', 'rsi', 'range_progress'];
@@ -396,7 +450,7 @@ const Screener = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* 30% Width Filter Sidebar */}
-        <aside className={`lg:w-[30%] space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+        <aside className={`lg:w-[30%] space-y-6 ${showFilters ? 'block' : 'hidden lg:block'} ${isFullscreen ? '!hidden' : ''}`}>
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl sticky top-24">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -465,29 +519,88 @@ const Screener = () => {
           </div>
         </aside>
 
-        {/* 70% Width Screener Grid */}
-        <div className="lg:w-[70%] space-y-6">
+        {/* Screener Grid / Full Screen Table */}
+        <div 
+          ref={tableContainerRef}
+          className={
+            isFullscreen
+              ? "fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 flex flex-col gap-4 overflow-hidden animate-in fade-in duration-200"
+              : "lg:w-[70%] space-y-6"
+          }
+        >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <header>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">Market Screener <span className="text-xs bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-1 rounded-lg">PRO</span></h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2 font-medium"><Target className="h-3.5 w-3.5" /> Scanning {totalCount} institutional-grade securities</p>
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                Market Screener <span className="text-xs bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-1 rounded-lg">PRO</span>
+                {isFullscreen && (
+                  <span className="text-xs bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider animate-pulse">
+                    Full Screen
+                  </span>
+                )}
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2 font-medium">
+                <Target className="h-3.5 w-3.5 text-blue-500" /> Scanning {totalCount} institutional-grade securities
+                {isFullscreen && activeFilters.length > 0 && (
+                  <span className="text-xs text-blue-500 font-semibold">• {activeFilters.length} filter{activeFilters.length > 1 ? 's' : ''} active</span>
+                )}
+              </p>
             </header>
-            <div className="flex items-center gap-3">
-              <button onClick={exportToCSV} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-emerald-500 transition-all shadow-sm" title="Export CSV"><Download className="h-5 w-5" /></button>
+            <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+              <button 
+                onClick={exportToCSV} 
+                className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-emerald-500 transition-all shadow-sm flex items-center gap-2" 
+                title="Export CSV"
+              >
+                <Download className="h-5 w-5" />
+                <span className="hidden md:inline text-xs font-bold">Export</span>
+              </button>
               <div className="relative group flex-1 sm:flex-none">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                <input type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search stocks..." className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-full sm:w-64 shadow-sm" />
+                <input 
+                  type="text" 
+                  value={search} 
+                  onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
+                  placeholder="Search stocks..." 
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all w-full sm:w-64 shadow-sm" 
+                />
               </div>
-              <button onClick={() => setShowFilters(!showFilters)} className={`lg:hidden p-2.5 rounded-xl border transition-all ${showFilters ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}><Settings2 className="h-5 w-5" /></button>
+              <button 
+                onClick={() => setShowFilters(!showFilters)} 
+                className={`lg:hidden p-2.5 rounded-xl border transition-all ${showFilters ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}
+                title="Toggle Filters"
+              >
+                <Settings2 className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={toggleFullScreen} 
+                className={`p-2.5 rounded-xl border transition-all shadow-sm flex items-center gap-2 ${
+                  isFullscreen 
+                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-500 shadow-blue-500/20' 
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:text-blue-500 hover:border-blue-500/50'
+                }`}
+                title={isFullscreen ? "Exit Fullscreen (Esc)" : "Full Screen Table"}
+              >
+                {isFullscreen ? (
+                  <>
+                    <Minimize2 className="h-5 w-5" />
+                    <span className="text-xs font-bold hidden sm:inline">Exit Fullscreen</span>
+                    <span className="text-[9px] bg-blue-700/50 px-1.5 py-0.5 rounded font-mono hidden md:inline">ESC</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="h-5 w-5" />
+                    <span className="text-xs font-bold hidden sm:inline">Full Screen</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
-
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl relative">
-            <div className="overflow-x-auto">
+          <div className={`bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl relative flex flex-col ${isFullscreen ? 'flex-1 min-h-0' : ''}`}>
+            <div className="overflow-x-auto overflow-y-auto flex-1">
               <table className="w-full text-left border-collapse table-auto">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/30 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-100 dark:border-slate-800/50">
+                <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800">
+                  <tr className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
                     {activeColumns.map(colId => {
                       const metric = AVAILABLE_METRICS.find(m => m.id === colId);
                       return (
@@ -499,7 +612,7 @@ const Screener = () => {
                         />
                       );
                     })}
-                    <th className="px-6 py-4 text-right text-slate-500 text-[10px] font-black uppercase tracking-widest sticky right-0 bg-slate-50 dark:bg-slate-800 z-10">Explore</th>
+                    <th className="px-6 py-4 text-right text-slate-500 text-[10px] font-black uppercase tracking-widest sticky right-0 bg-slate-50 dark:bg-slate-800 z-30">Explore</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
@@ -535,9 +648,9 @@ const Screener = () => {
                 </tbody>
               </table>
             </div>
-            {/* Pagination remains same ... */}
+            {/* Pagination */}
             {totalPages > 0 && (
-              <div className="px-6 py-6 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+              <div className="px-6 py-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 flex items-center justify-between sticky bottom-0 z-20">
                 <p className="text-xs text-slate-500 font-medium font-medium">Showing <span className="text-slate-900 dark:text-white font-bold">{(page-1)*pageSize + 1}</span> to <span className="text-slate-900 dark:text-white font-bold">{Math.min(page*pageSize, totalCount)}</span> of <span className="text-slate-900 dark:text-white font-bold">{totalCount}</span> institutional securities</p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 disabled:opacity-20 transition-all shadow-sm"><ChevronLeft className="h-4 w-4" /></button>

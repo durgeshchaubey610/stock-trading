@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.config import DB_HOST, DB_USER, DB_PASS, DB_NAME
+from app.config import DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
 
 import sys
 import os
@@ -12,7 +12,7 @@ if "pytest" in sys.modules or os.getenv("TESTING") == "1":
         connect_args={"check_same_thread": False}
     )
 else:
-    DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+    DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     engine = create_engine(
         DATABASE_URL,
         pool_pre_ping=True

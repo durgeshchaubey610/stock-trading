@@ -31,3 +31,4 @@
 | T-27 | FIRE & Retirement Gap Planner | Implemented FireProfile schemas/models, inflation-adjusted required corpus annuity math, pre/post retirement return split CAGR projection curves, and the front-end FirePlanner slider page. | 15k | 20m | Completed |
 | T-28 | Alternative Asset Protection Planning | Implemented an alternative protection vehicle comparison engine on the backend, built the AlternativeProtection.tsx tab UI, and integrated it into the /finance sub-layout. | 12k | 15m | Completed |
 | T-29 | Net Worth Asset & Liability Manager | Built NetWorthManager.tsx allowing users to add, view, and delete manual asset and liability logs with auto-consolidated net worth calculation. | 14k | 20m | Completed |
+| T-30 | AI Modules Documentation & Interview Guide | Created docs/aitool.md documenting all AI/ML models (FinBERT, TextBlob fallback, SignalEngine, Ticker NER, ScoringService, Gemini) with architectural diagrams and interview Q&A. | 18k | 15m | Completed |

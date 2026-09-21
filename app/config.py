@@ -38,6 +38,7 @@ def _get_int(name: str, default: int) -> int:
 
 
 DB_HOST = _get_env("DB_HOST", "localhost")
+DB_PORT = _get_env("DB_PORT", "3306")
 DB_USER = _get_env("DB_USER", "root")
 DB_PASS = _get_env("DB_PASS", "")
 DB_NAME = _get_env("DB_NAME", "stock_ai")

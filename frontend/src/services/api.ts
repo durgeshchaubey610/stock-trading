@@ -237,6 +237,12 @@ export const stockService = {
   addLiability: (data: any) => api.post('/finance/liabilities', data),
   deleteLiability: (id: number) => api.delete(`/finance/liabilities/${id}`),
 
+  // Expenses compatibility for Finance Dashboard
+  getExpenses: () => api.get('/finance/assets'),
+  getExpenseSummary: () => api.get('/finance/networth'),
+  createExpense: (data: any) => api.post('/finance/assets', data),
+  deleteExpense: (id: number) => api.delete(`/finance/assets/${id}`),
+
   // FIRE Retirement Planner (Phase 11)
   getFireProfile: () => api.get('/finance/fire-profile'),
   updateFireProfile: (data: any) => api.post('/finance/fire-profile', data),

@@ -1,0 +1,39 @@
+# Git & IDE
+.git
+.gitignore
+.vscode
+.agents
+.firebase
+.pytest_cache
+
+# Virtual environments
+openhands-env
+venv
+env
+ENV
+.venv
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Frontend source (built in its own container context)
+frontend/node_modules
+frontend/dist
+
+# Logs & temp files
+logs
+*.log
+*.db
+uploads
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation & notes
+docs
+*.md

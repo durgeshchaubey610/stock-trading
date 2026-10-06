@@ -29,7 +29,19 @@ const CentralDashboard = () => {
     queryFn: () => api.get('/dashboard/summary'),
   });
 
-  const summary = summaryResponse?.data;
+  const defaultSummary = {
+    net_worth: { net_worth_value: 0, total_assets: 0, total_liabilities: 0, assets: {}, liabilities: {} },
+    fire: { fire_number: 15000000, current_coverage_pct: 0, target_age: 50, years_remaining: 15 },
+    scores: { total_score: 50, emergency_fund_months: 6, savings_rate_pct: 25 },
+    gamification: { level: 1, xp_to_next: 100 },
+    roadmap: [
+      { stage: 1, title: 'Foundation', requirement: 'Set up your portfolio and watchlists', is_completed: true, action_link: '/screener' },
+      { stage: 2, title: 'Growth', requirement: 'Monitor live signals and screener picks', is_completed: false, action_link: '/screener' }
+    ],
+    insights: []
+  };
+
+  const summary = summaryResponse?.data || defaultSummary;
 
   const getInsightPath = (insight: any) => {
     const title = insight.title?.toLowerCase() || '';

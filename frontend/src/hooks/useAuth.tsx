@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { User } from '../types/auth';
 import { authService } from '../services/auth';
+import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -19,14 +21,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Initial check from localStorage for fast initial render
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        setUser(null);
+      }
     }
+
+    // 2. Persistent Firebase Auth state listener
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const idToken = await fbUser.getIdToken();
+          const activeUser: User = {
+            id: fbUser.uid,
+            username: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+            email: fbUser.email || '',
+            is_premium: true,
+            subscription_tier: 'premium'
+          };
+          setToken(idToken);
+          setUser(activeUser);
+          localStorage.setItem('token', idToken);
+          localStorage.setItem('user', JSON.stringify(activeUser));
+        } catch (e) {
+          console.warn('Error fetching token for Firebase user:', e);
+        }
+      }
+      setIsLoading(false);
+    });
+
     setIsLoading(false);
+    return () => unsubscribe();
   }, []);
 
   const login = (newToken: string, newUser: User) => {
@@ -40,6 +72,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     authService.logout();
     setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (
@@ -48,7 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       token, 
       login, 
       logout, 
-      isAuthenticated: !!token,
+      isAuthenticated: !!token || !!user,
       isLoading
     }}>
       {children}

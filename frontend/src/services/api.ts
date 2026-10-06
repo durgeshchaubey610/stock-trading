@@ -17,11 +17,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only warn on 401 rather than abruptly clearing the entire user session and forcing a reload
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      console.warn('API returned 401 on:', error.config?.url);
+      const isAuthCheck = error.config?.url?.includes('/profile') || error.config?.url?.includes('/auth/me');
+      if (isAuthCheck) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

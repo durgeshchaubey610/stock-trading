@@ -32,9 +32,9 @@ const Login: React.FC = () => {
 
     try {
       const response = await authService.login({ email, password });
-      if (response.token) {
-        login(response.token, response.user);
-        navigate('/');
+      if (response.token || response.user) {
+        login(response.token || 'firebase_token', response.user);
+        navigate('/', { replace: true });
       } else {
         setError('Login failed. Please check your credentials.');
       }

@@ -255,6 +255,14 @@ export const stockService = {
   verifySubscriptionPayment: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; plan_id: number }) =>
     api.post('/subscription/verify-payment', data),
   getInvoices: () => api.get('/subscription/invoices'),
+
+  // Firebase Realtime & Firestore Services
+  getFirebaseStatus: () => api.get('/firebase/status'),
+  getFirebaseStocks: () => api.get('/firebase/stocks'),
+  syncStocksToFirebase: (symbols?: string[]) => api.post('/firebase/sync-stocks', symbols ? symbols : undefined),
+  getQuarterlyReports: (symbol?: string) => api.get(`/firebase/quarterly-reports${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ''}`),
+  searchQuarterlyReportsVector: (query: string, top_k = 5) => api.post('/firebase/quarterly-reports/vector-search', { query, top_k }),
+  seedQuarterlyReports: () => api.post('/firebase/seed-reports'),
 };
 
 export default api;

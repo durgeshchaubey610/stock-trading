@@ -312,6 +312,13 @@ class StockSyncService:
                 stock.updated_at = datetime.utcnow()
                 db.commit()
 
+                # Sync to Firebase Realtime Database & Firestore
+                try:
+                    from app.services.firebase_service import FirebaseService
+                    FirebaseService.sync_stock_to_firebase(stock_data_for_signal)
+                except Exception as fb_err:
+                    logger.debug(f"Firebase sync notice for {symbol}: {fb_err}")
+
             except Exception as e:
                 db.rollback()
                 logger.error(f"Error syncing stock {symbol}: {e}")

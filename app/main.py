@@ -18,6 +18,7 @@ from app.routes.paper_trading_routes import router as paper_trading_router
 from app.routes.subscription_routes import router as subscription_router
 from app.routes.backtest_routes import router as backtest_router
 from app.routes.dashboard_routes import router as dashboard_router
+from app.routes.firebase_routes import router as firebase_router
 from app.logging_config import configure_logging
 
 from app.utils.scheduler import scheduler, start_scheduler
@@ -91,6 +92,7 @@ app.include_router(subscription_router)
 app.include_router(monitoring_router)
 app.include_router(backtest_router)
 app.include_router(dashboard_router)
+app.include_router(firebase_router)
 
 
 @app.get("/")

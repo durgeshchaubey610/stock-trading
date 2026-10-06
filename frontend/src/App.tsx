@@ -19,6 +19,7 @@ import StockDetail from './pages/StockDetail';
 // import AlternativeProtection from './pages/finance/AlternativeProtection';
 // import NetWorthManager from './pages/finance/NetWorthManager';
 import Backtester from './pages/Backtester';
+import FirebaseHub from './pages/FirebaseHub';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ function App() {
                   <Route path="screener" element={<Screener />} />
                   <Route path="baskets" element={<Baskets />} />
                   <Route path="backtest" element={<Backtester />} />
+                  <Route path="firebase-hub" element={<FirebaseHub />} />
                   {/* <Route path="finance" element={<FinanceLayout />}>
                     <Route index element={<Navigate to="goals" replace />} />
                     <Route path="goals" element={<SavingsGoals />} />

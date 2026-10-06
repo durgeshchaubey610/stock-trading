@@ -11,7 +11,8 @@ import {
   Moon,
   Zap,
   ChevronRight,
-  Activity
+  Activity,
+  Cloud
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -51,6 +52,7 @@ const Navbar = () => {
     { name: 'Screener', path: '/screener', icon: Search },
     { name: 'Backtest', path: '/backtest', icon: Activity },
     { name: 'Portfolio', path: '/baskets', icon: ShoppingBasket },
+    { name: 'Firebase', path: '/firebase-hub', icon: Cloud },
     // { name: 'Finance', path: '/finance', icon: TrendingUp },
   ];
 

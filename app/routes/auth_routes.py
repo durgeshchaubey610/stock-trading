@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.schemas.auth_schema import LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest, ChangePasswordRequest
+from app.schemas.auth_schema import LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest, ChangePasswordRequest, FirebaseSyncRequest
 from app.utils.jwt_handler import create_token
 from app.auth import get_current_user
 from passlib.context import CryptContext
@@ -83,6 +83,48 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
     if not verify_password(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_token({
+        "user_id": user.id,
+        "email": user.email
+    })
+
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "is_premium": user.is_premium,
+            "subscription_tier": user.subscription_tier,
+            "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else None
+        }
+    }
+
+
+@router.post("/firebase-sync")
+def firebase_sync(data: FirebaseSyncRequest, db: Session = Depends(get_db)):
+    from datetime import datetime, timedelta
+    user = db.query(User).filter(User.email == data.email).first()
+    expiry_date = datetime.utcnow() + timedelta(days=365)
+
+    if not user:
+        username = data.displayName or data.email.split("@")[0]
+        existing_u = db.query(User).filter(User.username == username).first()
+        if existing_u:
+            username = f"{username}_{data.uid[:4]}"
+        user = User(
+            username=username,
+            email=data.email,
+            password=hash_password(f"firebase_{data.uid}"),
+            is_premium=True,
+            subscription_tier="premium",
+            subscription_expiry=expiry_date
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     token = create_token({
         "user_id": user.id,

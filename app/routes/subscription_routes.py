@@ -5,17 +5,20 @@ from app.auth import get_db_user
 from app.models.user import User
 from app.models.subscription import SubscriptionPlan, UserInvoice
 from datetime import datetime, timedelta
-import razorpay
 import os
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/subscription", tags=["Subscription"])
 
-# Razorpay client (Use environment variables in production)
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_placeholder")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "placeholder_secret")
 
-client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+try:
+    import razorpay
+    client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+except ImportError:
+    razorpay = None
+    client = None
 
 class PaymentVerification(BaseModel):
     razorpay_order_id: str

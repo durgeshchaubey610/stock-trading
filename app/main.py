@@ -14,7 +14,7 @@ from app.routes.profile_routes import router as profile_router
 from app.routes.template_routes import router as template_router
 from app.routes.basket_routes import router as basket_router
 from app.routes.paper_trading_routes import router as paper_trading_router
-from app.routes.finance_routes import router as finance_router
+# from app.routes.finance_routes import router as finance_router
 from app.routes.subscription_routes import router as subscription_router
 from app.routes.backtest_routes import router as backtest_router
 from app.routes.dashboard_routes import router as dashboard_router
@@ -86,7 +86,7 @@ app.include_router(profile_router)
 app.include_router(template_router)
 app.include_router(basket_router)
 app.include_router(paper_trading_router)
-app.include_router(finance_router)
+# app.include_router(finance_router)
 app.include_router(subscription_router)
 app.include_router(monitoring_router)
 app.include_router(backtest_router)

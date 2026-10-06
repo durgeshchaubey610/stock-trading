@@ -8,7 +8,7 @@ import {
   Target, 
   Award,
   ChevronRight,
-  ShieldCheck,
+  // ShieldCheck,
   PiggyBank,
   CreditCard,
   Percent,
@@ -33,10 +33,12 @@ const CentralDashboard = () => {
 
   const getInsightPath = (insight: any) => {
     const title = insight.title?.toLowerCase() || '';
-    if (title.includes('emergency')) return '/finance/emergency-fund';
-    if (title.includes('insurance')) return '/finance/insurance';
+    // if (title.includes('emergency')) return '/finance/emergency-fund';
+    // if (title.includes('insurance')) return '/finance/insurance';
     if (title.includes('trading') || insight.category === 'Trading') return '/screener';
-    return '/finance/goals';
+    // return '/finance/goals';
+    // return '/finance/emergency-fund';
+    return '/screener';
   };
 
   if (isLoading) {
@@ -335,8 +337,8 @@ const CentralDashboard = () => {
             </div>
                 <div className="space-y-6">
               {[
-                { label: 'Emergency Fund Protection', score: scores.emergency_fund || 0, color: 'bg-emerald-500', icon: PiggyBank, path: '/finance/emergency-fund' },
-                { label: 'Insurance Coverage', score: scores.protection || 0, color: 'bg-rose-500', icon: ShieldCheck, path: '/finance/insurance' },
+                // { label: 'Emergency Fund Protection', score: scores.emergency_fund || 0, color: 'bg-emerald-500', icon: PiggyBank, path: '/finance/emergency-fund' },
+                // { label: 'Insurance Coverage', score: scores.protection || 0, color: 'bg-rose-500', icon: ShieldCheck, path: '/finance/insurance' },
                 { label: 'Investment Allocation', score: scores.wealth_building || 0, color: 'bg-blue-500', icon: TrendingUp, path: '/baskets' }
               ].map(item => (
                 <Link key={item.label} to={item.path} className="block space-y-2 group/gauge">

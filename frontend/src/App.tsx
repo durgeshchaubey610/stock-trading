@@ -11,13 +11,13 @@ import Register from './pages/Register';
 import Baskets from './pages/Baskets';
 import Profile from './pages/Profile';
 import StockDetail from './pages/StockDetail';
-import FinanceLayout from './pages/finance/FinanceLayout';
-import SavingsGoals from './pages/finance/SavingsGoals';
-import InsurancePolicies from './pages/finance/InsurancePolicies';
-import EmergencyFund from './pages/finance/EmergencyFund';
-import FirePlanner from './pages/finance/FirePlanner';
-import AlternativeProtection from './pages/finance/AlternativeProtection';
-import NetWorthManager from './pages/finance/NetWorthManager';
+// import FinanceLayout from './pages/finance/FinanceLayout';
+// import SavingsGoals from './pages/finance/SavingsGoals';
+// import InsurancePolicies from './pages/finance/InsurancePolicies';
+// import EmergencyFund from './pages/finance/EmergencyFund';
+// import FirePlanner from './pages/finance/FirePlanner';
+// import AlternativeProtection from './pages/finance/AlternativeProtection';
+// import NetWorthManager from './pages/finance/NetWorthManager';
 import Backtester from './pages/Backtester';
 
 const queryClient = new QueryClient({
@@ -45,15 +45,16 @@ function App() {
                   <Route path="screener" element={<Screener />} />
                   <Route path="baskets" element={<Baskets />} />
                   <Route path="backtest" element={<Backtester />} />
-                  <Route path="finance" element={<FinanceLayout />}>
+                  {/* <Route path="finance" element={<FinanceLayout />}>
                     <Route index element={<Navigate to="goals" replace />} />
                     <Route path="goals" element={<SavingsGoals />} />
+                    <Route index element={<Navigate to="emergency-fund" replace />} />
                     <Route path="insurance" element={<InsurancePolicies />} />
                     <Route path="emergency-fund" element={<EmergencyFund />} />
                     <Route path="fire-planner" element={<FirePlanner />} />
                     <Route path="alternatives" element={<AlternativeProtection />} />
                     <Route path="networth" element={<NetWorthManager />} />
-                  </Route>
+                  </Route> */}
                   <Route path="profile" element={<Profile />} />
                   <Route path="stock/:symbol" element={<StockDetail />} />
                 </Route>

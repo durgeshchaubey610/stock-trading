@@ -1,17 +1,17 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { 
-  PiggyBank, ShieldCheck, Flame, Coins, Landmark
-} from 'lucide-react';
+// import { 
+//   PiggyBank, ShieldCheck, Flame, Coins, Landmark
+// } from 'lucide-react';
 
 const FinanceLayout = () => {
 
-  const tabs = [
-    { path: '/finance/goals', name: 'Savings Goals', icon: TargetIcon },
-    { path: '/finance/emergency-fund', name: 'Emergency Fund', icon: PiggyBank },
-    { path: '/finance/insurance', name: 'Insurance Policies', icon: ShieldCheck },
-    { path: '/finance/fire-planner', name: 'FIRE Planner', icon: Flame },
-    { path: '/finance/alternatives', name: 'Alternative Assets', icon: Coins },
-    { path: '/finance/networth', name: 'Net Worth', icon: Landmark },
+  const tabs: { path: string; name: string; icon: any }[] = [
+    // { path: '/finance/goals', name: 'Savings Goals', icon: TargetIcon },
+    // { path: '/finance/emergency-fund', name: 'Emergency Fund', icon: PiggyBank },
+    // { path: '/finance/insurance', name: 'Insurance Policies', icon: ShieldCheck },
+    // { path: '/finance/fire-planner', name: 'FIRE Planner', icon: Flame },
+    // { path: '/finance/alternatives', name: 'Alternative Assets', icon: Coins },
+    // { path: '/finance/networth', name: 'Net Worth', icon: Landmark },
   ];
 
   return (
@@ -53,6 +53,7 @@ const FinanceLayout = () => {
 
 export default FinanceLayout;
 
+/*
 function TargetIcon(props: any) {
   return (
     <svg
@@ -73,3 +74,4 @@ function TargetIcon(props: any) {
     </svg>
   );
 }
+*/

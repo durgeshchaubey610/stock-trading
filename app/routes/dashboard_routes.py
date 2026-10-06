@@ -165,14 +165,16 @@ def get_dashboard_summary(current_user: dict = Depends(get_current_user), db: Se
             "title": "Risk Protection",
             "requirement": "Log health or term life insurance policies",
             "is_completed": has_health or has_life,
-            "action_link": "/finance/insurance"
+            # "action_link": "/finance/insurance"
+            "action_link": "/"
         },
         {
             "stage": 3,
             "title": "Emergency Cushion",
             "requirement": "Fund a 6-month living expense safety cushion",
             "is_completed": emergency_score >= 99.0,
-            "action_link": "/finance/emergency-fund"
+            # "action_link": "/finance/emergency-fund"
+            "action_link": "/"
         },
         {
             "stage": 4,
@@ -186,7 +188,9 @@ def get_dashboard_summary(current_user: dict = Depends(get_current_user), db: Se
             "title": "Wealth Accumulator",
             "requirement": "Reach 25% of your target FIRE FI Number",
             "is_completed": fi_progress >= 25.0,
-            "action_link": "/finance/goals"
+            # "action_link": "/finance/goals"
+            # "action_link": "/finance/emergency-fund"
+            "action_link": "/"
         },
         {
             "stage": 6,

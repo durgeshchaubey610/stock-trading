@@ -51,7 +51,7 @@ const Navbar = () => {
     { name: 'Screener', path: '/screener', icon: Search },
     { name: 'Backtest', path: '/backtest', icon: Activity },
     { name: 'Portfolio', path: '/baskets', icon: ShoppingBasket },
-    { name: 'Finance', path: '/finance', icon: TrendingUp },
+    // { name: 'Finance', path: '/finance', icon: TrendingUp },
   ];
 
   const handleLogout = () => {

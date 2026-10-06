@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, Loader2, Coins, HelpCircle, 
-  ArrowRight, ShieldAlert
+  /* ArrowRight, */ ShieldAlert
 } from 'lucide-react';
 
 const AlternativeProtection = () => {
@@ -113,9 +113,9 @@ const AlternativeProtection = () => {
 
                 <div className="mt-6 flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                   <span className="text-slate-550 dark:text-slate-400">Liquidity: {alt.liquidity}</span>
-                  <Link to="/finance/goals" className="inline-flex items-center gap-1 text-indigo-600 hover:gap-1.5 transition-all">
+                  {/* <Link to="/finance/goals" className="inline-flex items-center gap-1 text-indigo-600 hover:gap-1.5 transition-all">
                      Build Goal <ArrowRight className="h-3 w-3" />
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             ))}
